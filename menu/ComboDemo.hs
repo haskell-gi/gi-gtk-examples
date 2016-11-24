@@ -10,8 +10,8 @@ import GI.Gtk
         comboBoxNewWithEntry, mainQuit, onWidgetDestroy, windowNew,
         Entry(..), onEntryActivate, entryGetText)
 import GI.Gtk.Enums (WindowType(..))
-import Graphics.UI.Gtk.MenuComboToolbar.ComboBox (comboBoxSetModelText, comboBoxAppendText, comboBoxGetModelText)
-import Graphics.UI.Gtk.ModelView.ListStore (listStoreToList, listStoreAppend)
+import Data.GI.Gtk.ComboBox (comboBoxSetModelText, comboBoxAppendText, comboBoxGetModelText)
+import Data.GI.Gtk.ModelView.SeqStore (seqStoreToList, seqStoreAppend)
 
 main = do
   Gtk.init Nothing
@@ -37,11 +37,11 @@ main = do
   onEntryActivate entry $ do
     str <- entryGetText entry
     store <- comboBoxGetModelText combo
-    elems <- listStoreToList store
+    elems <- seqStoreToList store
     comboBoxSetActive combo (-1)
     idx <- case elemIndex str elems of
       Just idx -> return $ fromIntegral idx
-      Nothing -> listStoreAppend store str
+      Nothing -> seqStoreAppend store str
     comboBoxSetActive combo idx
     return ()
 

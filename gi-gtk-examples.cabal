@@ -1,0 +1,204 @@
+name: gi-gtk-exmples
+version: 0.15.0
+cabal-version: >=1.18
+build-type: Simple
+license: LGPL-2.1
+license-file: COPYING
+copyright: (c) 2001-2010 The Gtk2Hs Team
+maintainer: gtk2hs-users@lists.sourceforge.net
+stability: provisional
+homepage: https://github.com/haskell-gi/gi-gtk-examples
+bug-reports: https://github.com/haskell-gi/gi-gtk-examples/issues
+synopsis: Examples for using the Gtk+ 3 graphical user interface library
+description:
+    These are exmples originally written for the Gtk2Hs suite of libraries
+    ported to use haskell-gi instead.
+category: Graphics
+author: Axel Simon, Duncan Coutts and many others
+tested-with: GHC ==7.0.4 GHC ==7.2.2 GHC ==7.4.1
+data-files:
+    actionMenu/ActionMenu.hs
+    actionMenu/Makefile
+    buttonbox/ButtonBox.hs
+    buttonbox/Makefile
+    carsim/CarSim.hs
+    carsim/Makefile
+    concurrent/Makefile
+    concurrent/Progress.hs
+    concurrent/ProgressThreadedRTS.hs
+    embedded/Embedded.hs
+    embedded/Makefile
+    embedded/MPlayer.hs
+    embedded/Notes.txt
+    embedded/Uzbl.hs
+    fastdraw/FastDraw.hs
+    fastdraw/Makefile
+    filechooser/FileChooserDemo.glade
+    filechooser/FileChooserDemo.hs
+    filechooser/Makefile
+    fonts/Fonts.hs
+    fonts/Makefile
+    graphic/Drawing.hs
+    graphic/Makefile
+    gtkbuilder/GtkBuilderTest.hs
+    gtkbuilder/Makefile
+    gtkbuilder/simple.ui
+    hello/Makefile
+    hello/World.hs
+    inputmethod/Layout.hs
+    inputmethod/Makefile
+    menu/ComboDemo.hs
+    menu/Makefile
+    menu/MenuDemo.hs
+    notebook/Notebook.hs
+    notebook/Makefile
+    statusicon/Makefile
+    statusicon/StatusIcon.hs
+    treelist/Completion.hs
+    treelist/DirList.hs
+    treelist/FilterDemo.hs
+    treelist/ListDemo.hs
+    treelist/ListDND.hs
+    treelist/ListTest.glade
+    treelist/ListTest.hs
+    treelist/ListText.hs
+    treelist/Makefile
+    treelist/rgb.txt
+    treelist/TreeDemo.hs
+    treelist/TreeSort.hs
+    treelist/TreeTest.glade
+    treelist/TreeTest.hs
+    treelist/resListDND/desktop.png
+    treelist/resListDND/laptop.png
+    treelist/resListDND/laptopSmall.png
+    treelist/resListDND/printer.png
+    treelist/resListDND/server.png
+    treelist/resListDND/tower.png
+    unicode/Arabic.hs
+    unicode/Makefile
+    demos.txt
+data-dir: .
+extra-source-files:
+
+source-repository head
+    type: git
+    location: https://github.com/haskell-gi/gi-gtk-examples
+
+executable gi-gtk-demo-fonts
+    main-is: Fonts.hs
+    build-depends:
+        gi-gtk -any,
+        gi-gtk-hs -any,
+        gi-pango -any,
+        gi-pangocairo -any,
+        base -any
+    default-language: Haskell2010
+    hs-source-dirs: fonts
+
+executable gi-gtk-demo-builder
+    main-is: GtkBuilderTest.hs
+    build-depends:
+        gi-gtk -any,
+        gi-gtk-hs -any,
+        haskell-gi-base -any,
+        base -any,
+        transformers -any,
+        text -any
+    default-language: Haskell2010
+    hs-source-dirs: gtkbuilder
+
+executable gi-gtk-demo-helloworld
+    main-is: World.hs
+    build-depends:
+        gi-gtk -any,
+        gi-gtk-hs -any,
+        base -any,
+        transformers -any
+    default-language: Haskell2010
+    hs-source-dirs: hello
+
+--executable gi-gtk-demo-layout
+--    main-is: Layout.hs
+--    build-depends:
+--        gi-gdk -any,
+--        gi-gtk -any,
+--        gi-gtk-hs -any,
+--        gi-pango -any,
+--        gi-pangocairo -any,
+--        base -any,
+--        transformers -any,
+--        gi-cairo -any,
+--        text -any,
+--        cairo >=0.13.1.1 && <0.14
+--    default-language: Haskell2010
+--    hs-source-dirs: inputmethod
+
+executable gi-gtk-demo-menudemo
+    main-is: MenuDemo.hs
+    build-depends:
+        gi-gtk -any,
+        gi-gtk-hs -any,
+        base -any,
+        transformers -any,
+        text -any
+    default-language: Haskell2010
+    hs-source-dirs: menu
+
+executable gi-gtk-demo-combodemo
+    main-is: ComboDemo.hs
+    build-depends:
+        haskell-gi-base -any,
+        gi-gtk -any,
+        gi-gtk-hs -any,
+        text -any,
+        base -any,
+        transformers -any
+    default-language: Haskell2010
+    hs-source-dirs: menu
+
+executable gi-gtk-demo-notebook
+    main-is: Notebook.hs
+    build-depends:
+        haskell-gi-base -any,
+        gi-glib -any,
+        gi-gdk -any,
+        gi-gtk -any,
+        gi-gtk-hs -any,
+        base -any,
+        transformers -any,
+        text -any
+    default-language: Haskell2010
+    hs-source-dirs: notebook
+
+executable gi-gtk-demo-statusIcon
+    main-is: StatusIcon.hs
+    build-depends:
+        gi-gtk -any,
+        gi-gtk-hs -any,
+        base -any,
+        transformers -any
+    default-language: Haskell2010
+    hs-source-dirs: statusicon
+
+executable gi-gtk-demo-arabic
+    main-is: Arabic.hs
+    build-depends:
+        haskell-gi-base -any,
+        gi-gtk -any,
+        gi-gtk-hs -any,
+        base -any,
+        transformers -any,
+        text -any
+    default-language: Haskell2010
+    hs-source-dirs: unicode
+
+executable gi-gtk-demo-overlay
+    main-is: Overlay.hs
+    build-depends:
+        gi-gtk -any,
+        gi-gtk-hs -any,
+        base -any,
+        transformers -any
+    default-language: Haskell2010
+    hs-source-dirs: overlay
+

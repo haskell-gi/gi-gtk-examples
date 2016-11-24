@@ -14,8 +14,8 @@ import Data.Maybe
 import Data.Text (Text)
 import Data.Monoid ((<>))
 import GI.Gtk
-       (containerRemove, ContainerK, boxReorderChild, widgetGetParent,
-        WidgetK, BoxK, imageNewFromPixbuf, iconThemeLoadIcon,
+       (containerRemove, IsContainer, boxReorderChild, widgetGetParent,
+        IsWidget, IsBox, imageNewFromPixbuf, iconThemeLoadIcon,
         iconThemeGetDefault, Image, spinnerStop, widgetShow, spinnerStart,
         labelSetText, setWindowTitle, boxPackStart, toolButtonNew,
         spinnerNew, hBoxNew, mainQuit, onWidgetDestroy, containerAdd,
@@ -27,7 +27,7 @@ import qualified Data.Text as T (unpack)
 import qualified GI.Gtk as Gtk (main, init)
 import GI.Gtk.Enums (WindowType(..), WindowPosition(..))
 import Data.GI.Base.Attributes (AttrOp(..), set)
-import GI.Gdk (keyvalName, eventKeyReadKeyval, eventKeyReadState)
+import GI.Gdk (keyvalName, getEventKeyKeyval, getEventKeyState)
 import GI.Gdk.Flags (ModifierType(..))
 import GI.GLib (timeoutAdd, pattern PRIORITY_DEFAULT)
 import GI.Gtk.Flags (IconLookupFlags(..))
@@ -59,10 +59,10 @@ main = do
   -- Handle key press action.
   onWidgetKeyPressEvent window $ \e ->
     -- Create new tab when user press Ctrl+n
-    eventKeyReadState e >>= \case
+    getEventKeyState e >>= \case
       [ModifierTypeControlMask] ->
-        eventKeyReadKeyval e >>= keyvalName >>= \case
-          "n" -> do
+        getEventKeyKeyval e >>= keyvalName >>= \case
+          Just "n" -> do
             -- Create text view.
             textView <- textViewNew
             widgetShowAll textView -- must show before add notebook,
@@ -140,13 +140,13 @@ imageNewFromIcon :: Text -> Int -> IO Image
 imageNewFromIcon iconName size = do
   iconTheme <- iconThemeGetDefault
   -- Function 'iconThemeLoadIcon' can scale icon with specified size.
-  pixbuf <- iconThemeLoadIcon iconTheme iconName (fromIntegral size) [IconLookupFlagsUseBuiltin]
+  pixbuf <- fromJust <$> iconThemeLoadIcon iconTheme iconName (fromIntegral size) [IconLookupFlagsUseBuiltin]
   imageNewFromPixbuf (Just pixbuf)
 
 -- | Try to packing widget in box.
 -- If @child@ have exist parent, do nothing,
 -- otherwise, add @child@ to @parent@.
-boxTryPack :: (BoxK parent, WidgetK child) => parent -> child -> Bool -> Bool -> Maybe Int -> Int -> IO ()
+boxTryPack :: (IsBox parent, IsWidget child) => parent -> child -> Bool -> Bool -> Maybe Int -> Int -> IO ()
 boxTryPack box widget expand fill order space =
     void (widgetGetParent widget)
   `catch` (\(_ :: UnexpectedNullPointerReturn) -> do
@@ -154,7 +154,7 @@ boxTryPack box widget expand fill order space =
     order ?>= (boxReorderChild box widget . fromIntegral))
 
 -- | Try to remove child from parent.
-containerTryRemove :: (ContainerK parent, WidgetK child) => parent -> child -> IO ()
+containerTryRemove :: (IsContainer parent, IsWidget child) => parent -> child -> IO ()
 containerTryRemove parent widget = do
   hasParent <- (widgetGetParent widget >> return True) `catch` (\(_ :: UnexpectedNullPointerReturn) -> return False)
   when hasParent $ containerRemove parent widget
