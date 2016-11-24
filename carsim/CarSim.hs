@@ -41,8 +41,8 @@ import Graphics.Rendering.Cairo
 import qualified GI.Gtk as GI (init, main)
 import GI.GLib (pattern PRIORITY_DEFAULT, sourceRemove, timeoutAdd)
 import GI.Gdk
-       (eventMotionReadY, eventMotionReadX, windowGetHeight,
-        windowGetWidth, eventMotionReadWindow)
+       (getEventMotionY, getEventMotionX, windowGetHeight,
+        windowGetWidth, getEventMotionWindow)
 import GI.Gdk.Flags (EventMask(..))
 import Control.Monad.Trans.Reader (ReaderT(..))
 import GI.Gtk.Enums
@@ -64,7 +64,7 @@ drawSide = 5/2 :: Double
 
 -- A few conveniences
 eventWindowSize e = do
-    dr <- eventMotionReadWindow e
+    dr <- fromJust <$> getEventMotionWindow e
     w <- windowGetWidth dr
     h <- windowGetHeight dr
     return $ if w*h > 1
@@ -73,8 +73,8 @@ eventWindowSize e = do
 
 eventPolarCoordinates e = do
     (w,h) <- eventWindowSize e
-    x <- eventMotionReadX e
-    y <- eventMotionReadY e
+    x <- getEventMotionX e
+    y <- getEventMotionY e
     let (origX, origY) = (w/2, h/2)
     let (scaleX, scaleY) = (drawSide/w, drawSide/h)
     let (x',y') = (scaleX*(x-origX), scaleY*(y-origY))
