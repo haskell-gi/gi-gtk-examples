@@ -4,8 +4,8 @@
 -- Example of an international dialog box.
 import GI.Gtk
        (Box(..), dialogRun, widgetShowAll, boxPackStart, labelSetMarkup,
-        labelNew, dialogGetContentArea, pattern STOCK_NO, pattern STOCK_YES,
-        dialogAddButton, dialogNew, pattern STOCK_OK, widgetShow)
+        labelNew, dialogGetContentArea,
+        dialogAddButton, dialogNew, widgetShow)
 
 import Control.Applicative
 import Prelude
@@ -20,8 +20,8 @@ main :: IO ()
 main = do
   Gtk.init Nothing
   dia <- dialogNew
-  dialogAddButton dia STOCK_YES (fromIntegral $ fromEnum ResponseTypeYes)
-  dialogAddButton dia STOCK_NO (fromIntegral $ fromEnum ResponseTypeNo)
+  dialogAddButton dia "Yes" (fromIntegral $ fromEnum ResponseTypeYes)
+  dialogAddButton dia "No" (fromIntegral $ fromEnum ResponseTypeNo)
   contain <- dialogGetContentArea dia >>= unsafeCastTo Box
   theText <- labelNew (Nothing :: Maybe Text)
   labelSetMarkup theText (T.pack arabic)
@@ -45,7 +45,7 @@ arabic = markSpan ["size=\"36000\""]  $
 yell :: IO ()
 yell = do
   dia <- dialogNew
-  dialogAddButton dia STOCK_OK (fromIntegral $ fromEnum ResponseTypeOk)
+  dialogAddButton dia "OK" (fromIntegral $ fromEnum ResponseTypeOk)
   contain <- dialogGetContentArea dia >>= unsafeCastTo Box
   msg <- labelNew (Just "This is not an option.")
   boxPackStart contain msg False False 0

@@ -1,3 +1,4 @@
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE PatternSynonyms #-}
 -- Example of concurrent Haskell and Gtk.
 --
@@ -15,7 +16,7 @@ import Control.Concurrent
 import qualified GI.Gtk as GI (init)
 import GI.Gtk
        (progressBarPulse, ProgressBar, dialogRun, widgetShowAll,
-        boxPackStart, progressBarNew, dialogGetContentArea, pattern STOCK_CLOSE,
+        boxPackStart, progressBarNew, dialogGetContentArea,
         dialogAddButton, dialogNew)
 import GI.Gtk.Enums (ResponseType(..))
 import GI.GLib (pattern PRIORITY_DEFAULT, idleAdd)
@@ -26,7 +27,7 @@ main = do
   GI.init Nothing
 
   dia <- dialogNew
-  dialogAddButton dia STOCK_CLOSE (fromIntegral $ fromEnum ResponseTypeClose)
+  dialogAddButton dia "_Close" (fromIntegral $ fromEnum ResponseTypeClose)
   contain <- dialogGetContentArea dia
   pb <- progressBarNew
   boxPackStart contain pb False False 0
