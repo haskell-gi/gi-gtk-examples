@@ -1,3 +1,4 @@
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE PatternSynonyms #-}
 -- Example of concurrent Haskell and Gtk.
 --
@@ -22,7 +23,7 @@ main :: IO ()
 main = do
   GI.init Nothing
   dia <- dialogNew
-  dialogAddButton dia STOCK_CLOSE (fromIntegral $ fromEnum ResponseTypeClose)
+  dialogAddButton dia "_Close" (fromIntegral $ fromEnum ResponseTypeClose)
   contain <- dialogGetContentArea dia
   pb <- progressBarNew
   boxPackStart contain pb False False 0

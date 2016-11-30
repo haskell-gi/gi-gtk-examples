@@ -18,14 +18,14 @@ import GI.Gtk
         IsWidget, IsBox, imageNewFromPixbuf, iconThemeLoadIcon,
         iconThemeGetDefault, Image, spinnerStop, widgetShow, spinnerStart,
         labelSetText, setWindowTitle, boxPackStart, toolButtonNew,
-        spinnerNew, hBoxNew, mainQuit, onWidgetDestroy, containerAdd,
+        spinnerNew, boxNew, mainQuit, onWidgetDestroy, containerAdd,
         notebookRemovePage, notebookPageNum, onToolButtonClicked,
         notebookAppendPageMenu, labelNew, widgetShowAll, textViewNew,
         onWidgetKeyPressEvent, windowSetPosition, windowSetDefaultSize,
-        notebookNew, windowNew, ToolButton, Label, Spinner, HBox)
+        notebookNew, windowNew, ToolButton, Label, Spinner, Box)
 import qualified Data.Text as T (unpack)
 import qualified GI.Gtk as Gtk (main, init)
-import GI.Gtk.Enums (WindowType(..), WindowPosition(..))
+import GI.Gtk.Enums (Orientation(..), WindowType(..), WindowPosition(..))
 import Data.GI.Base.Attributes (AttrOp(..), set)
 import GI.Gdk (keyvalName, getEventKeyKeyval, getEventKeyState)
 import GI.Gdk.Flags (ModifierType(..))
@@ -35,7 +35,7 @@ import Control.Exception (catch)
 import Data.GI.Base.BasicTypes (UnexpectedNullPointerReturn(..))
 
 data NotebookTab =
-    NotebookTab {ntBox          :: HBox
+    NotebookTab {ntBox          :: Box
                 ,ntSpinner      :: Spinner
                 ,ntLabel        :: Label
                 ,ntCloseButton  :: ToolButton
@@ -101,7 +101,7 @@ notebookTabNew :: Maybe Text -> Maybe Int -> IO NotebookTab
 notebookTabNew name size = do
   -- Init.
   let iconSize = fromMaybe 12 size
-  box <- hBoxNew False 0
+  box <- boxNew OrientationHorizontal 0
   spinner <- spinnerNew
   label <- labelNew name
   image <- imageNewFromIcon "window-close" iconSize

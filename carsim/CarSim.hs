@@ -13,20 +13,20 @@ import Prelude
 import Data.Maybe
 import GI.Gtk
        (widgetShowAll, onWidgetDestroy, setWindowDefaultHeight,
-        setWindowDefaultWidth, setWindowTitle, boxPackStart, hBoxNew,
-        vBoxNew, frameSetShadowType, aspectFrameNew,
+        setWindowDefaultWidth, setWindowTitle, boxPackStart, boxNew,
+        frameSetShadowType, aspectFrameNew,
         widgetGetAllocatedHeight, widgetGetAllocatedWidth, onWidgetDraw,
         onWidgetLeaveNotifyEvent, onWidgetMotionNotifyEvent,
         widgetAddEvents, alignmentSetPadding, alignmentNew, rangeSetValue,
         scaleSetDigits, scaleSetValuePos, rangeGetValue,
-        afterScaleButtonValueChanged, vScaleNewWithRange, containerAdd,
-        hButtonBoxNew, mainQuit, onButtonActivate, pattern STOCK_QUIT, pattern STOCK_ABOUT,
+        afterScaleButtonValueChanged, scaleNewWithRange, containerAdd,
+        buttonBoxNew, mainQuit, onButtonActivate,
         toggleButtonGetActive, onToggleButtonToggled, buttonSetUseStock,
-        pattern STOCK_MEDIA_PAUSE, toggleButtonNewWithLabel, onButtonClicked,
-        pattern STOCK_CLEAR, buttonNewFromStock, widgetQueueDraw, drawingAreaNew,
+        toggleButtonNewWithLabel, onButtonClicked,
+        buttonNewWithLabel, widgetQueueDraw, drawingAreaNew,
         windowNew, widgetDestroy, dialogRun, setAboutDialogComments,
         setAboutDialogAuthors, setAboutDialogVersion,
-        setAboutDialogProgramName, aboutDialogNew)
+        setAboutDialogProgramName, aboutDialogNew, labelNew)
 import GI.Cairo
 import Control.Monad
 import Data.IORef
@@ -46,7 +46,7 @@ import GI.Gdk
 import GI.Gdk.Flags (EventMask(..))
 import Control.Monad.Trans.Reader (ReaderT(..))
 import GI.Gtk.Enums
-       (WindowType(..), ShadowType(..), PositionType(..))
+       (Orientation(..), WindowType(..), ShadowType(..), PositionType(..))
 import Data.Monoid ((<>))
 import Data.GI.Base.BasicConversions (gflagsToWord)
 import Graphics.Rendering.Cairo.Types (Cairo(..))
@@ -197,29 +197,28 @@ main = do
 
     buttons <- do
 
-        qr <- buttonNewFromStock STOCK_CLEAR
+        qr <- buttonNewWithLabel "Clear"
         onButtonClicked qr $ do
             (liftM length) getCars >>= setCars . newCarList
             getCurrentTime >>= setTimeStamp
             widgetQueueDraw drawingArea
 
-        qp <- toggleButtonNewWithLabel STOCK_MEDIA_PAUSE
-        buttonSetUseStock qp True
+        qp <- toggleButtonNewWithLabel "Pause"
         onToggleButtonToggled qp $ do
             p <- toggleButtonGetActive qp
             if p
                 then pause
                 else resume
 
-        qa <- buttonNewFromStock STOCK_ABOUT
+        qa <- buttonNewWithLabel "About"
         onButtonClicked qa about
 
-        qq <- buttonNewFromStock STOCK_QUIT
-        onButtonActivate qq (do
+        qq <- buttonNewWithLabel "Quit"
+        onButtonClicked qq (do
                        widgetDestroy mainWindow
                        mainQuit)
 
-        bb <- hButtonBoxNew
+        bb <- buttonBoxNew OrientationHorizontal
         containerAdd bb qr
         containerAdd bb qp
         containerAdd bb qa
@@ -228,7 +227,7 @@ main = do
 
     howMany <- do
 
-        sc <- vScaleNewWithRange 1 40 1
+        sc <- scaleNewWithRange OrientationVertical 1 40 1
         afterScaleButtonValueChanged sc $ \_ -> do
             v <- floor <$> rangeGetValue sc
             c <- getCars
@@ -280,8 +279,8 @@ main = do
     -- properly arranged.
 
     layout <- do
-        vb <- vBoxNew False 0
-        hb <- hBoxNew False 0
+        vb <- boxNew OrientationVertical 0
+        hb <- boxNew OrientationHorizontal 0
         boxPackStart vb track True True 0
         boxPackStart vb buttons False False 0
         boxPackStart hb howMany False False 0

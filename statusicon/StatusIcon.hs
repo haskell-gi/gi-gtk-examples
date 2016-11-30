@@ -7,12 +7,12 @@ import GI.Gtk
         menuShellAppend, menuItemNewWithLabel, mainQuit, menuNew,
         onStatusIconActivate, menuPopup, widgetShowAll,
         onStatusIconPopupMenu, statusIconSetTooltipText,
-        statusIconSetVisible, pattern STOCK_QUIT, statusIconNewFromStock)
+        statusIconSetVisible, statusIconNewFromStock)
 import qualified GI.Gtk as Gtk (main, init)
 
 main = do
   Gtk.init Nothing
-  icon <- statusIconNewFromStock STOCK_QUIT
+  icon <- statusIconNewFromStock "_Quit"
   statusIconSetVisible icon True
   statusIconSetTooltipText icon "This is a test"
   menu <- mkmenu icon

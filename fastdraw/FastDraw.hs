@@ -1,5 +1,6 @@
-{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE PatternSynonyms #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# OPTIONS -O #-}
 
 -- Example of an drawing graphics onto a canvas.
@@ -15,7 +16,7 @@ import qualified GI.Gtk as GI (init)
 import GI.Gtk
        (dialogRun, widgetShow, boxPackStart, onWidgetDraw,
         widgetQueueDraw, setWidgetHeightRequest, setWidgetWidthRequest,
-        drawingAreaNew, dialogGetContentArea, pattern STOCK_OK, dialogAddButton,
+        drawingAreaNew, dialogGetContentArea, dialogAddButton,
         dialogNew)
 import GI.Gtk.Enums (ResponseType(..))
 import GI.GLib (pattern PRIORITY_LOW, idleAdd)
@@ -29,7 +30,7 @@ import Graphics.Rendering.Cairo.Internal (Render(..))
 main = do
   GI.init Nothing
   dia <- dialogNew
-  dialogAddButton dia STOCK_OK (fromIntegral $ fromEnum ResponseTypeOk)
+  dialogAddButton dia "_OK" (fromIntegral $ fromEnum ResponseTypeOk)
   contain <- dialogGetContentArea dia
   canvas <- drawingAreaNew
   let w = 256

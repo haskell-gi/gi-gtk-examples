@@ -3,12 +3,12 @@ module Main (main) where
 
 import GI.Gtk
        (overlayAddOverlay, widgetShowAll, setButtonBoxLayoutStyle,
-        containerAdd, hButtonBoxNew, setWidgetMarginBottom,
+        containerAdd, buttonBoxNew, setWidgetMarginBottom,
         setWidgetMarginLeft, boxPackStart, buttonNewWithLabel, labelNew,
-        vBoxNew, setContainerChild, overlayNew, setContainerBorderWidth,
+        boxNew, setContainerChild, overlayNew, setContainerBorderWidth,
         mainQuit, onWidgetDestroy, windowNew)
 import qualified GI.Gtk as Gtk (main, init)
-import GI.Gtk.Enums (ButtonBoxStyle(..), WindowType(..))
+import GI.Gtk.Enums (ButtonBoxStyle(..), Orientation(..), WindowType(..))
 
 main :: IO ()
 main = do
@@ -27,7 +27,7 @@ main = do
 
   setContainerChild window overlay
 
-  vbox <- vBoxNew True 3
+  vbox <- boxNew OrientationVertical 3
   label1 <- labelNew (Just "This is an overlayed label")
   button <- buttonNewWithLabel "another one"
   label3 <- labelNew (Just "and a final one")
@@ -40,7 +40,7 @@ main = do
 
   overlayAddOverlay overlay vbox
 
-  hbuttonbox <- hButtonBoxNew
+  hbuttonbox <- buttonBoxNew OrientationHorizontal
 
   containerAdd overlay hbuttonbox
 

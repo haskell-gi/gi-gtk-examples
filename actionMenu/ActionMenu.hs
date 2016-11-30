@@ -16,13 +16,9 @@ import GI.Gtk.Objects.Widget
        (widgetShowAll, setWidgetHeightRequest, setWidgetWidthRequest,
         onWidgetDestroy)
 import GI.Gtk.Objects.TextView (textViewNew)
-import GI.Gtk.Objects.VBox (vBoxNew)
-import GI.Gtk.Objects.Box (boxPackStart, setBoxHomogeneous)
+import GI.Gtk.Objects.Box (boxNew, boxPackStart, setBoxHomogeneous)
 import GI.Gtk.Objects.Container (containerAdd)
-import GI.Gtk.Constants
-       (pattern STOCK_PASTE, pattern STOCK_COPY, pattern STOCK_CUT, pattern STOCK_QUIT,
-        pattern STOCK_SAVE_AS, pattern STOCK_SAVE, pattern STOCK_OPEN, pattern STOCK_NEW)
-import GI.Gtk.Enums (WindowType(..))
+import GI.Gtk.Enums (Orientation (..), WindowType(..))
 import qualified Data.Text as T (length)
 
 -- A function like this can be used to tag string literals for i18n.
@@ -76,35 +72,35 @@ main = do
   -- Create menu items
   newAct <- actionNew "NewAction" (Just (__"New"))
             (Just (__"Clear the spreadsheet area."))
-            (Just STOCK_NEW)
+            (Just "_New")
   onActionActivate newAct $ putStrLn "New activated."
   openAct <- actionNew "OpenAction" (Just (__"Open"))
             (Just (__"Open an existing spreadsheet."))
-            (Just STOCK_OPEN)
+            (Just "_Open")
   onActionActivate openAct $ putStrLn "Open activated."
   saveAct <- actionNew "SaveAction" (Just (__"Save"))
             (Just (__"Save the current spreadsheet."))
-            (Just STOCK_SAVE)
+            (Just "_Save")
   onActionActivate saveAct $ putStrLn "Save activated."
   saveAsAct <- actionNew "SaveAsAction" (Just (__"SaveAs"))
             (Just (__"Save spreadsheet under new name."))
-            (Just STOCK_SAVE_AS)
+            (Just "Save_As")
   onActionActivate saveAsAct $ putStrLn "SaveAs activated."
   exitAct <- actionNew "ExitAction" (Just (__"Exit"))
             (Just (__"Exit this application."))
-            (Just STOCK_QUIT)
+            (Just "_Quit")
   onActionActivate exitAct mainQuit
   cutAct <- actionNew "CutAction" (Just (__"Cut"))
             (Just (__"Cut out the current selection."))
-            (Just STOCK_CUT)
+            (Just "Cu_t")
   onActionActivate cutAct $ putStrLn "Cut activated."
   copyAct <- actionNew "CopyAction" (Just (__"Copy"))
             (Just (__"Copy the current selection."))
-            (Just STOCK_COPY)
+            (Just "_Copy")
   onActionActivate copyAct $ putStrLn "Copy activated."
   pasteAct <- actionNew "PasteAction" (Just (__"Paste"))
             (Just (__"Paste the current selection."))
-            (Just STOCK_PASTE)
+            (Just "_Paste")
   onActionActivate pasteAct $ putStrLn "Paste activated."
 
   standardGroup <- actionGroupNew ("standard"::Text)
@@ -124,7 +120,7 @@ main = do
   toolBar <- uIManagerGetWidget ui "/ui/toolbar"
 
   edit <- textViewNew
-  vBox <- vBoxNew False 0
+  vBox <- boxNew OrientationVertical 0
   setBoxHomogeneous vBox False
   boxPackStart vBox menuBar False False 0
   boxPackStart vBox toolBar False False 0
