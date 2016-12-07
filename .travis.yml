@@ -1,0 +1,27 @@
+sudo: required
+services:
+ - docker
+
+cache:
+  directories:
+    - .cabal
+    - .ghc
+
+env:
+ - CABALVER=1.24 GHCVER=7.10.3 OSVER=xenial
+ - CABALVER=1.24 GHCVER=8.0.1 OSVER=xenial
+
+before_install:
+ - docker build -t gi-gtk-hs -f travis/$OSVER.Dockerfile travis
+
+script:
+ - docker run -v `pwd`:/build gi-gtk-hs
+   bash -x -c "
+      apt-get install -y cabal-install-$CABALVER ghc-$GHCVER &&
+      export PATH=\$HOME/.cabal/bin:/opt/ghc/$GHCVER/bin:/opt/cabal/$CABALVER/bin:/opt/alex/3.1.7/bin:/opt/happy/1.19.5/bin:\$PATH &&
+      ./travis/build.sh"
+
+notifications:
+  irc:
+    channels: "irc.freenode.net#gtk2hs"
+  email: true

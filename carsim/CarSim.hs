@@ -50,7 +50,6 @@ import GI.Gtk.Enums
 import Data.Monoid ((<>))
 import Data.GI.Base.BasicConversions (gflagsToWord)
 import Graphics.Rendering.Cairo.Types (Cairo(..))
-import Foreign.ForeignPtr (withForeignPtr)
 import Foreign.Ptr (castPtr)
 import Graphics.Rendering.Cairo.Internal (Render(..))
 
@@ -260,7 +259,7 @@ main = do
         onWidgetLeaveNotifyEvent dr $ \e ->
             setJam Nothing >> return True
 
-        onWidgetDraw dr $ \(Context fp) -> withForeignPtr fp $ \p -> (`runReaderT` Cairo (castPtr p)) $ runRender $ do
+        onWidgetDraw dr $ \(Context fp) -> withManagedPtr fp $ \p -> (`runReaderT` Cairo (castPtr p)) $ runRender $ do
             w <- liftIO $ fromIntegral <$> widgetGetAllocatedWidth dr
             h <- liftIO $ fromIntegral <$> widgetGetAllocatedHeight dr
             jam <- liftIO getJam

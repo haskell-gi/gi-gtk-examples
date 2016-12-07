@@ -1,4 +1,4 @@
-name: gi-gtk-exmples
+name: gi-gtk-examples
 version: 0.15.0
 cabal-version: >=1.18
 build-type: Simple
@@ -148,6 +148,7 @@ executable gi-gtk-demo-progressThreadedRTS
 executable gi-gtk-demo-fastDraw
     main-is: FastDraw.hs
     build-depends:
+        haskell-gi-base -any,
         gi-glib -any,
         gi-gtk -any,
         gi-gtk-hs -any,

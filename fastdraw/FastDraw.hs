@@ -21,10 +21,10 @@ import GI.Gtk
 import GI.Gtk.Enums (ResponseType(..))
 import GI.GLib (pattern PRIORITY_LOW, idleAdd)
 import GI.Cairo.Structs.Context (Context(..))
-import Foreign.ForeignPtr (withForeignPtr)
 import Control.Monad.Trans.Reader (runReaderT)
 import Foreign.Ptr (castPtr)
 import Graphics.Rendering.Cairo.Internal (Render(..))
+import Data.GI.Base.ManagedPtr (withManagedPtr)
 
 
 main = do
@@ -78,7 +78,7 @@ main = do
             return True
 
       idleAdd PRIORITY_LOW updateBlue
-      onWidgetDraw canvas $ \(Context fp) -> withForeignPtr fp $ \p -> (`runReaderT` Cairo (castPtr p)) $ runRender $ do
+      onWidgetDraw canvas $ \(Context fp) -> withManagedPtr fp $ \p -> (`runReaderT` Cairo (castPtr p)) $ runRender $ do
         updateCanvas pbData w h stride
         return True
       boxPackStart contain canvas True True 0
