@@ -1,3 +1,5 @@
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TupleSections #-}
 {-# LANGUAGE OverloadedStrings #-}
 -- Example of using a PangoLayout
 
@@ -19,22 +21,27 @@ import GI.Gtk
         onIMContextPreeditStart, iMMulticontextNew, onWidgetDraw,
         onWidgetSizeAllocate, widgetQueueDraw, widgetSetSizeRequest,
         containerAdd, drawingAreaNew, mainQuit, onWidgetDestroy, windowNew)
-import GI.Gtk.Enums (WrapMode(..), WindowType(..))
+import GI.Gtk.Enums (WindowType(..))
 import GI.Pango
-       (AttrList, Attribute, attrListInsert, attrListNew, Layout,
-        layoutSetWidth, layoutNew, layoutSetAttributes, layoutSetText,
-        layoutSetWrap)
-import GI.PangoCairo.Functions (showLayout, fontMapGetDefault)
+       (contextSetFontMap, contextNew, setAttributeEndIndex,
+        setAttributeStartIndex, setAttributeKlass, Attribute(..),
+        getAttributeEndIndex, getAttributeStartIndex, getAttributeKlass,
+        AttrList, attrListInsert, attrListNew, Layout, layoutSetWidth,
+        layoutNew, layoutSetAttributes, layoutSetText, layoutSetWrap)
+import GI.PangoCairo (showLayout, fontMapGetDefault)
 import GI.Gdk
-       (keyvalToUnicode, keyvalName, eventKeyReadKeyval,
-        eventKeyReadState, EventKey, rectangleReadWidth)
+       (getEventKeyKeyval, getEventKeyState, getRectangleWidth,
+        keyvalToUnicode, keyvalName, EventKey)
 import GI.Cairo.Structs.Context (Context(..))
 import Foreign.ForeignPtr (withForeignPtr)
-import Control.Monad.Trans.Reader (ReaderT(..))
+import Control.Monad.Trans.Reader (ReaderT(..), ask)
 import Graphics.Rendering.Cairo.Types (Cairo(..))
 import Foreign.Ptr (castPtr)
 import Graphics.Rendering.Cairo.Internal (Render(..))
 import Control.Monad.IO.Class (MonadIO(..))
+import Data.GI.Base.Constructible (Constructible(..))
+import GI.Pango.Enums (WrapMode(..))
+import Data.GI.Base.ManagedPtr (withManagedPtr)
 
 loremIpsum = "Lorem ipsum dolor sit amet, consectetur adipisicing elit,\
         \ sed do eiusmod tempor incididunt ut labore et dolore magna\
@@ -77,8 +84,11 @@ attrListNewFromList list = do
     mapM_ (attrListInsert al) list
     return al
 
+attrListNewToList :: MonadIO m => AttrList -> m [Attribute]
+attrListNewToList list = () -- TODO
+
 main = do
-  Gtk.init
+  Gtk.init Nothing
 
   -- Create the main window.
   win <- windowNew WindowTypeToplevel
@@ -95,7 +105,9 @@ main = do
 
   -- Create a Cairo Context that contains information about the current font,
   -- etc.
-  ctxt <- fontMapGetDefault
+  fm <- fontMapGetDefault
+  ctxt <- contextNew
+  contextSetFontMap ctxt fm
   lay <- layoutNew ctxt
   layoutSetWrap lay WrapModeWord
 
@@ -104,24 +116,24 @@ main = do
           preedit <- readIORef preeditRef
           case preedit of
               Nothing -> do
-                  layoutSetText lay (displayBuffer buffer)
-                  layoutSetAttributes lay []
+                  layoutSetText lay (displayBuffer buffer) (-1)
+                  layoutSetAttributes lay Nothing
               Just (str,attrs,pos) -> do
-                  layoutSetText lay (displayBufferPreedit buffer str pos)
-                  attrListNewFromList (map (shiftAttribute (cursor + 1))
-                                               (concat attrs)) >>= layoutSetAttributes lay
+                  layoutSetText lay (displayBufferPreedit buffer str (fromIntegral pos)) (-1)
+                  mapM (shiftAttribute (cursor + 1)) attrs
+                        >>= attrListNewFromList >>= layoutSetAttributes lay . Just
           widgetQueueDraw area
 
   relayout
 
   -- Wrap the layout to a different width each time the window is resized.
   onWidgetSizeAllocate area $ \r -> do
-    w <- rectangleReadWidth r
-    layoutSetWidth lay (Just (fromIntegral w))
+    w <- getRectangleWidth r
+    layoutSetWidth lay (fromIntegral w)
 
   -- Setup the handler to draw the layout.
-  onWidgetDraw area $ \(Context fp) -> withForeignPtr fp $ \p -> (`runReaderT` Cairo (castPtr p)) $ runRender $ do
-    updateArea area lay
+  onWidgetDraw area $ \ctx@(Context fp) -> withManagedPtr fp $ \p -> (`runReaderT` Cairo (castPtr p)) $ runRender $ do
+    updateArea area lay ctx
     return True
 
   -- Set up input method
@@ -134,14 +146,14 @@ main = do
       writeIORef preeditRef Nothing
       relayout
   onIMContextPreeditChanged im $ do
-      writeIORef preeditRef . Just =<< iMContextGetPreeditString im
+      writeIORef preeditRef . Just =<< (\(t, a, n) -> (t, , n) <$> attrListNewToList a) =<< iMContextGetPreeditString im
       relayout
   onIMContextCommit im $ \str -> do
       modifyIORef buffer (insertStr str)
       relayout
   onIMContextRetrieveSurrounding im $ do
       Buffer text pos <- readIORef buffer
-      iMContextSetSurrounding im text pos
+      iMContextSetSurrounding im text (-1) (fromIntegral pos)
       return True
   onIMContextDeleteSurrounding im $ \off nchars -> do
       putStrLn $ "delete-surrounding("++show off++","++show nchars++")"
@@ -151,9 +163,9 @@ main = do
       iMContextSetClientWindow im =<< widgetGetWindow win
   onWidgetFocusInEvent win $ \e -> liftIO (iMContextFocusIn  im) >> return False
   onWidgetFocusOutEvent win $ \e -> liftIO (iMContextFocusOut im) >> return False
-  onWidgetKeyReleaseEvent win $ \e -> iMContextFilterKeypress im
+  onWidgetKeyReleaseEvent win $ \e -> iMContextFilterKeypress im e
   onWidgetKeyPressEvent win $ \e ->  do
-    imHandled <- iMContextFilterKeypress im
+    imHandled <- iMContextFilterKeypress im e
     if imHandled then return True else do
        mod <- interpretKeyPress e
        case mod of
@@ -163,24 +175,24 @@ main = do
   widgetShowAll win
   Gtk.main
 
-updateArea :: DrawingArea -> Layout -> Render ()
-updateArea area lay = do
+updateArea :: DrawingArea -> Layout -> Context -> Render ()
+updateArea area lay ctx = do
     moveTo 0 0
-    showLayout lay
+    showLayout ctx lay
 
 interpretKeyPress :: EventKey -> IO (Maybe (Buffer -> Buffer))
 interpretKeyPress e = do
-    modifiers <- eventKeyReadState e
+    modifiers <- getEventKeyState e
     if modifiers /= [] then return Nothing else do
-        keyVal <- eventKeyReadKeyval
+        keyVal <- getEventKeyKeyval e
         keyName <- keyvalName keyVal
-        keyChar <- toEnum <$> keyvalToUnicode keyVal
+        keyChar <- toEnum . fromIntegral <$> keyvalToUnicode keyVal
         case keyChar of
             '\0' ->
                 case keyName of
-                    "Left" -> returnJust moveLeft
-                    "Right" -> returnJust moveRight
-                    "BackSpace" -> returnJust deleteChar
+                    Just "Left" -> returnJust moveLeft
+                    Just "Right" -> returnJust moveRight
+                    Just "BackSpace" -> returnJust deleteChar
                     _ -> return Nothing
             ch -> do
                 -- This does not appear to get called; the IM handles
@@ -190,9 +202,15 @@ interpretKeyPress e = do
     where returnJust = return . Just
 
 shiftAttribute :: Int -> Attribute -> IO Attribute
-shiftAttribute x attr = attr { paStart = x + paStart attr,
-                               paEnd   = x + paEnd attr }
-
+shiftAttribute x attr = do
+    klass <- getAttributeKlass attr
+    start <- getAttributeStartIndex attr
+    end <- getAttributeEndIndex attr
+    newAttr <- new Attribute [] -- TODO
+    setAttributeKlass newAttr klass
+    setAttributeStartIndex newAttr (start + x)
+    setAttributeEndIndex newAttr (end + x)
+    return newAttr
 
 
 

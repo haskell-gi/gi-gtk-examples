@@ -201,6 +201,7 @@ executable gi-gtk-demo-helloworld
 --        gi-gtk-hs -any,
 --        gi-pango -any,
 --        gi-pangocairo -any,
+--        haskell-gi-base -any,
 --        base -any,
 --        transformers -any,
 --        gi-cairo -any,
