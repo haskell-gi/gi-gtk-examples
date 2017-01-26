@@ -26,8 +26,9 @@ import GI.Pango
        (contextSetFontMap, contextNew, setAttributeEndIndex,
         setAttributeStartIndex, setAttributeKlass, Attribute(..),
         getAttributeEndIndex, getAttributeStartIndex, getAttributeKlass,
-        AttrList, attrListInsert, attrListNew, Layout, layoutSetWidth,
-        layoutNew, layoutSetAttributes, layoutSetText, layoutSetWrap)
+        AttrList(..), attrListInsert, attrListNew, Layout, layoutSetWidth,
+        layoutNew, layoutSetAttributes, layoutSetText, layoutSetWrap,
+        AttrIterator(..), attrIteratorGetAttrs, attrIteratorDestroy)
 import GI.PangoCairo (showLayout, fontMapGetDefault)
 import GI.Gdk
        (getEventKeyKeyval, getEventKeyState, getRectangleWidth,
@@ -36,12 +37,13 @@ import GI.Cairo.Structs.Context (Context(..))
 import Foreign.ForeignPtr (withForeignPtr)
 import Control.Monad.Trans.Reader (ReaderT(..), ask)
 import Graphics.Rendering.Cairo.Types (Cairo(..))
-import Foreign.Ptr (castPtr)
+import Foreign.Ptr (Ptr, castPtr)
 import Graphics.Rendering.Cairo.Internal (Render(..))
 import Control.Monad.IO.Class (MonadIO(..))
 import Data.GI.Base.Constructible (Constructible(..))
 import GI.Pango.Enums (WrapMode(..))
-import Data.GI.Base.ManagedPtr (withManagedPtr)
+import Data.GI.Base.ManagedPtr (withManagedPtr, wrapPtr)
+import Data.GI.Base.BasicTypes (wrappedPtrCopy)
 
 loremIpsum = "Lorem ipsum dolor sit amet, consectetur adipisicing elit,\
         \ sed do eiusmod tempor incididunt ut labore et dolore magna\
@@ -84,8 +86,15 @@ attrListNewFromList list = do
     mapM_ (attrListInsert al) list
     return al
 
+foreign import ccall "pango_attr_list_get_iterator" pango_attr_list_get_iterator :: 
+    Ptr AttrList -> IO (Ptr AttrIterator)
+
 attrListNewToList :: MonadIO m => AttrList -> m [Attribute]
-attrListNewToList list = () -- TODO
+attrListNewToList list = liftIO $ withManagedPtr list $ \listPtr -> do
+  it <- pango_attr_list_get_iterator listPtr >>= wrapPtr AttrIterator
+  attrs <- attrIteratorGetAttrs it
+  attrIteratorDestroy it
+  return attrs
 
 main = do
   Gtk.init Nothing
@@ -203,33 +212,9 @@ interpretKeyPress e = do
 
 shiftAttribute :: Int -> Attribute -> IO Attribute
 shiftAttribute x attr = do
-    klass <- getAttributeKlass attr
     start <- getAttributeStartIndex attr
     end <- getAttributeEndIndex attr
-    newAttr <- new Attribute [] -- TODO
-    setAttributeKlass newAttr klass
-    setAttributeStartIndex newAttr (start + x)
-    setAttributeEndIndex newAttr (end + x)
+    newAttr <- wrappedPtrCopy attr
+    setAttributeStartIndex newAttr (start + fromIntegral x)
+    setAttributeEndIndex newAttr (end + fromIntegral x)
     return newAttr
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
