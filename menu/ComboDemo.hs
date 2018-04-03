@@ -30,7 +30,7 @@ main = do
 
   -- Get the entry widget that the ComboBoxEntry uses.
   w <- binGetChild combo
-  entry <- unsafeCastTo Entry w
+  entry <- maybe (error "Could not get child") (unsafeCastTo Entry) w
 
   -- Whenever the user has completed editing the text, append the new
   -- text to the store unless it's already in there.
