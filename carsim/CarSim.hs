@@ -247,7 +247,7 @@ main = do
     track <- do
 
         let dr = drawingArea
-        widgetAddEvents dr (gflagsToWord [EventMaskPointerMotionMask])
+        widgetAddEvents dr [EventMaskPointerMotionMask]
 
         onWidgetMotionNotifyEvent dr $ \e -> do
             (r,t) <- eventPolarCoordinates e
