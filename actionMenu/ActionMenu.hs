@@ -116,8 +116,8 @@ main = do
   onWidgetDestroy win mainQuit
   setWidgetWidthRequest win 200
   setWidgetHeightRequest win 100
-  menuBar <- uIManagerGetWidget ui "/ui/menubar"
-  toolBar <- uIManagerGetWidget ui "/ui/toolbar"
+  Just menuBar <- uIManagerGetWidget ui "/ui/menubar"
+  Just toolBar <- uIManagerGetWidget ui "/ui/toolbar"
 
   edit <- textViewNew
   vBox <- boxNew OrientationVertical 0
