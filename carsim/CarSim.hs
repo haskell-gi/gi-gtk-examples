@@ -19,7 +19,7 @@ import GI.Gtk
         onWidgetLeaveNotifyEvent, onWidgetMotionNotifyEvent,
         widgetAddEvents, alignmentSetPadding, alignmentNew, rangeSetValue,
         scaleSetDigits, scaleSetValuePos, rangeGetValue,
-        afterScaleButtonValueChanged, scaleNewWithRange, containerAdd,
+        onRangeValueChanged, setRangeInverted, scaleNewWithRange, containerAdd,
         buttonBoxNew, mainQuit, onButtonActivate,
         toggleButtonGetActive, onToggleButtonToggled, buttonSetUseStock,
         toggleButtonNewWithLabel, onButtonClicked,
@@ -227,7 +227,8 @@ main = do
     howMany <- do
 
         sc <- scaleNewWithRange OrientationVertical 1 40 1
-        afterScaleButtonValueChanged sc $ \_ -> do
+        setRangeInverted sc True
+        onRangeValueChanged sc $ do
             v <- floor <$> rangeGetValue sc
             c <- getCars
             setCars $ newCarListFromList v c
