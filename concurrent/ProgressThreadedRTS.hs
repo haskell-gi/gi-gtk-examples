@@ -8,7 +8,7 @@
 -- Because Gtk+ is single threaded we have to be very careful to call
 -- Gtk+ only from the main GUI thread. So while it's ok to forkIO,
 -- any GUI actions in that thread have to be 'posted' to the main GUI
--- thread using postGUI, or postGUIAsync as in the example here.
+-- thread GI.GLib.idleAdd as in the example here.
 
 import Control.Applicative
 import Prelude
